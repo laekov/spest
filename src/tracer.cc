@@ -2,28 +2,36 @@
 
 
 void Tracer::dims(TDim blocks, TDim threads) {
-	fou << "META.LAUNCH_DIMS " << blocks.x << " " << blocks.y << " " << blocks.z << " "
-		<< threads.x << " " << threads.y << " " << threads.z << std::endl;
+	sz = blocks;
+	shp = threads;
 }
 
 void Tracer::setWFLimit(int n) {
-	fou << "META.WF_LIMIT " << n << std::endl;
 }
 
 void Tracer::block(TDim idx) {
-	fou << "LAUNCH_THREAD " << idx.x << " " << idx.y << " " << idx.z << std::endl;
+	if (current_tb) {
+		cusim->addTB(current_tb);
+	}
+	current_tb = 0;
 }
 
 void Tracer::thread(TDim idx) {
-	fou << "LAUNCH_THREAD " << idx.x << " " << idx.y << " " << idx.z << std::endl;
+	if (current_tb) {
+		current_tb->nextThread();
+	} else {
+		current_tb = new TBSim(shp);
+	}
 }
 
 void Tracer::ld(void* addr, size_t sz) {
-	fou << "ATOMIC.GLOBAL " << sz << " " << (unsigned long)addr << std::endl;
-	n += sz;
+	current_tb->ld(addr, sz);
 }
 
 cnt_t Tracer::get() const {
-	return n;
+	if (current_tb) {
+		cusim->addTB(current_tb);
+	}
+	return cusim->calculate();
 }
 
