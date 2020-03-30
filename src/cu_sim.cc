@@ -5,5 +5,9 @@ void CUSim::addTB(TBSim* tb) {
 }
 
 cnt_t CUSim::calculate() {
-	return 0;
+	cnt_t tot_trans = 0;
+	for (auto tb : tbs) {
+		tot_trans += tb->calculate();
+	}
+	return tot_trans;
 }
