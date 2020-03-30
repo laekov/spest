@@ -14,8 +14,8 @@ struct TDim {
 };
 
 #define ENUM_TDIM(iter, lim) \
-	for (TDim iter(0); iter.x < lim.x; ++iter.x) \
+	for (TDim iter(0, 0, 0); iter.z < lim.z; ++iter.z) \
 		for (iter.y = 0; iter.y < lim.y; ++iter.y) \
-			for (iter.z = 0; iter.z < lim.z; ++iter.z)
+			for (iter.x = 0; iter.x < lim.x; ++iter.x) \
 
 #endif  // TDIM_H
