@@ -2,7 +2,7 @@
 #ifndef TDIM_H
 #define TDIM_H
 
-typedef unsigned long long cnt_t;
+typedef double cnt_t;
 
 struct TDim {
 	unsigned long x, y, z;

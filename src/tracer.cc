@@ -6,7 +6,8 @@ void Tracer::dims(TDim blocks, TDim threads) {
 	shp = threads;
 }
 
-void Tracer::setWFLimit(int n) {
+void Tracer::limitTBperCU(int n) {
+	cusim->max_tb = std::min(cusim->max_tb, n);
 }
 
 void Tracer::block(TDim idx) {

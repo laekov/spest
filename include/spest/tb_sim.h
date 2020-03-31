@@ -19,7 +19,7 @@ struct TBSim {
 
 	void ld(void*, size_t);
 	void nextThread();
-	cnt_t calculate();
+	cnt_t calculate(int);
 };
 
 #endif  // TB_SIM_H

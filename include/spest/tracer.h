@@ -22,7 +22,7 @@ struct Tracer {
 
 	void dims(TDim blocks, TDim threads);
 
-	void setWFLimit(int n);
+	void limitTBperCU(int n);
 
 	void block(TDim idx);
 
