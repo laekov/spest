@@ -3,6 +3,7 @@
 #define SIM_MEM_H
 
 #include "tracer.h"
+#include "hash.h"
 
 template <class T>
 class ROTensor {
@@ -13,12 +14,14 @@ private:
 public:
 	ROTensor(T* arr_, Tracer* t_=0): arr(arr_) , t(t_) {}
 
-	T operator [](const unsigned long addr) const {
+	T operator ()(const unsigned long addr, const char* file=__builtin_FILE(), 
+			const int line=__builtin_LINE()) const {
+		hash_t caller = hashCallerInfo(file, line);
 		if (arr) {
-			t->ld(arr + addr);
+			t->ld(arr + addr, caller);
 			return arr[addr];
 		} else {
-			t->ld((T*)this + addr);
+			t->ld((T*)this + addr, caller);
 			return 0;
 		}
 	}

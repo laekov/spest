@@ -9,6 +9,7 @@
 #include "tdim.h"
 #include "tb_sim.h"
 #include "cu_sim.h"
+#include "hash.h"
 
 
 struct Tracer {
@@ -16,7 +17,7 @@ struct Tracer {
 	TBSim *current_tb;
 	CUSim *cusim;
 
-	void ld(void* addr, size_t sz);
+	void ld(void* addr, size_t sz, hash_t caller);
 
 	Tracer(): current_tb(0), cusim(new CUSim) {}
 
@@ -29,11 +30,12 @@ struct Tracer {
 	void thread(TDim idx);
 
 	template<class T>
-	void ld(T* addr) {
-		this->ld((void*)addr, sizeof(T));
+	void ld(T* addr, hash_t caller) {
+		this->ld((void*)addr, sizeof(T), caller);
 	}
 
 	cnt_t get() const;
 };
+
 
 #endif  // TRACER_H

@@ -25,8 +25,8 @@ void Tracer::thread(TDim idx) {
 	}
 }
 
-void Tracer::ld(void* addr, size_t sz) {
-	current_tb->ld(addr, sz);
+void Tracer::ld(void* addr, size_t sz, hash_t caller) {
+	current_tb->ld(addr, sz, caller);
 }
 
 cnt_t Tracer::get() const {
