@@ -41,7 +41,14 @@ double HwSpec::getGlobalMemLat(int threads, int width) {
 	auto it = global_mem_lat.find(key);
 	if (it != global_mem_lat.end()) {
 		return it->second;
-	} else {
-		return mean_global_mem_lat;
 	}
+	int wr = 1;
+	for (; wr < width; wr <<= 1);
+	key = encodeKey(wr, threads);
+	it = global_mem_lat.find(key);
+	if (it != global_mem_lat.end()) {
+		return it->second;
+	}
+	// SPEST_LOG(width);
+	return mean_global_mem_lat;
 }

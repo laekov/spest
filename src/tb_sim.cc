@@ -31,8 +31,8 @@ cnt_t TBSim::calculate(int num_threads) {
 			i = j;
 			continue;
 		}
-		for (j = i + 1; j < addrs.size() && addrs[j] == addrs[j - 1] + 4 && j - i < 512; ++j);
-		tot_trans += gpu->getGlobalMemLat(num_threads, (j - i) / 4);
+		for (j = i + 1; j < addrs.size() && addrs[j] == addrs[j - 1] + 4 && j - i < 128; ++j);
+		tot_trans += gpu->getGlobalMemLat(num_threads, (j - i));
 		i = j;
 	}
 	return tot_trans;
