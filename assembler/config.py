@@ -2,11 +2,14 @@ output_size = 128
 input_size = 1
 hidden_size = 256
 
+batch_size = 20
+comp_size = 100
+
 data_path = '/home/laekov/spest/data/threadblock_break'
 
 cuda = True
 
-lr = 4e-6
+lr = 1e-4
 weight_decay = 1e-6
 
 train_iters = 1000000

@@ -11,7 +11,6 @@ class Estimator(nn.Module):
         super(Estimator, self).__init__()
         self.RNN = RNN(input_size, hidden_size, output_size)
         self.fc1 = nn.Linear(output_size, 128)
-        self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x, out_idx):
         h = self.RNN.init_hidden()
@@ -23,7 +22,6 @@ class Estimator(nn.Module):
                 outs.append(o)
                 j += 1
         outs = torch.stack(outs)
-        outs = self.fc1(outs)
         outs = F.relu(outs)
-        outs = self.fc2(outs).reshape((len(out_idx), ))
+        outs = self.fc1(outs)
         return outs

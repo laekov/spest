@@ -20,7 +20,7 @@ class DataLoader(object):
             if len(inds) == 0:
                 continue
             self.label_ind.append(inds)
-            self.label_val.append(torch.tensor(vals, dtype=torch.float32))
+            self.label_val.append(vals)
             with open('{}/tb_mem_cnt/{}'.format(path, d), 'r') as f:
                 l_x = list(map(float, f.read().split()))
                 x = torch.tensor(l_x, dtype=torch.float32)
@@ -31,5 +31,8 @@ class DataLoader(object):
     def next(self, train=True):
         if train:
             idx = random.randint(0, self.train_cut - 1)
+        return self.get(idx)
+
+    def get(self, idx):
         return self.datas[idx], self.label_ind[idx], self.label_val[idx]
 

@@ -2,37 +2,74 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import os
+import random
 
-from model.estimator import Estimator
+from model.model import PerfCompare
 from dataloader import DataLoader
+from emave import ExpMovAve
 import config
 
 
 def main():
-    dataset= DataLoader(config.data_path)
-    model = Estimator(config.input_size, config.hidden_size)
+    dataset = DataLoader(config.data_path)
+    model = PerfCompare()
+
     if config.load_path is not None and os.path.exists(config.load_path):
         model.load_state_dict(torch.load(config.load_path))
+
     if config.cuda:
         model.cuda()
-    optim = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
-    loss_accum = None
+
+    optim = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+
+    loss_accum = ExpMovAve()
+    accu_accum = ExpMovAve()
     best_loss = None
+
     for i in range(config.train_iters):
-        data, idxs, label = dataset.next()
-        data, label = data.cuda(), label.cuda()
-        out = model(data, idxs)
-        loss = F.l1_loss(out, label) / len(idxs)
-        if loss_accum is None:
-            loss_accum = loss.item()
-        else:
-            loss_accum = config.mave_weight * loss_accum + (1. - config.mave_weight) * loss.item()
+        labels = []
+        outs = []
+        for _ in range(config.batch_size):
+            data, idxs, label = dataset.next()
+            data = data.cuda()
+            out = model.est(data, idxs)
+            labels = labels + label
+            outs.append(out)
+
+        outs = torch.cat(outs, dim=0)
+        
+        cmpa, cmpb = [], []
+        answer = []
+        for _ in range(config.comp_size):
+            ia, ib = random.randint(0, len(labels) - 1), random.randint(0, len(labels) - 1)
+            cmpa.append(outs[ia])
+            cmpb.append(outs[ib])
+            ans = 2
+            if labels[ia] < labels[ib]:
+                ans = 0
+            elif labels[ia] > labels[ib]:
+                ans = 1
+            answer.append(ans)
+
+        cmpa = torch.stack(cmpa)
+        cmpb = torch.stack(cmpb)
+        answer = torch.tensor(answer)
+        if config.cuda:
+            answer = answer.cuda()
+        cmp_res = model.comp(cmpa, cmpb)
+        loss = F.cross_entropy(cmp_res, answer)
+        prediction = cmp_res.argmax(dim=1)
+        accu = (prediction == answer).int().sum() / float(answer.shape[0])
+
         loss.backward()
         optim.step()
-        if i % 100 == 0:
-            print('Iteration {} loss {}'.format(i, loss_accum))
-            if best_loss is None or loss_accum < best_loss:
-                best_loss = loss_accum
+
+        loss_accum.add(loss.item())
+        accu_accum.add(accu.item())
+        if i % 10 == 0:
+            print('Iteration {} loss {} accuracy {}'.format(i, loss_accum, accu_accum))
+            if False: #best_loss is None or loss_accum.value < best_loss:
+                best_loss = loss_accum.value
                 print('Saving')
                 torch.save(model.state_dict(), 'ckpt/1.pt')
 
