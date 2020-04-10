@@ -12,11 +12,14 @@ class RNN(nn.Module):
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=0)
 
-    def forward(self, x, h):
+    def forward(self, x, h, need_out=False):
         c = torch.cat((x, h), dim=0)
         h = self.i2h(c)
-        o = self.i2o(c)
-        o = self.softmax(o)
+        if need_out:
+            o = self.i2o(c)
+            o = self.softmax(o)
+        else:
+            o = None
         return o, h
 
     def init_hidden(self):

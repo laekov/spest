@@ -9,7 +9,7 @@ class Comparator(nn.Module):
         self.fc = nn.Linear(input_size * 2, 3)
 
     def forward(self, x, y):
-        x = F.relu(x)
-        y = F.relu(y)
+        x = F.softmax(x, dim=1)
+        y = F.softmax(y, dim=1)
         o = self.fc(torch.cat((x, y), dim=1))
         return o
