@@ -58,6 +58,9 @@ def main():
             answer = answer.cuda()
         cmp_res = model.comp(cmpa, cmpb)
         loss = F.cross_entropy(cmp_res, answer)
+        if torch.isnan(loss):
+            raise ValueError('Loss becomes NaN! Last datasets are: \n{}'.format(
+                dataset.get_last_records(64)))
         prediction = cmp_res.argmax(dim=1)
         accu = (prediction == answer).int().sum() / float(answer.shape[0])
 
@@ -67,12 +70,12 @@ def main():
         loss_accum.add(loss.item())
         accu_accum.add(accu.item())
         if i % 10 == 0:
-            print('Iteration {} loss {} accuracy {}'.format(i, loss_accum, accu_accum))
+            print('Iteration {} loss {:.5} accuracy {:.4} accum accuracy {:.4}'.format(
+                i, loss_accum.value, accu.item(), accu_accum.value))
             if False: #best_loss is None or loss_accum.value < best_loss:
                 best_loss = loss_accum.value
                 print('Saving')
                 torch.save(model.state_dict(), 'ckpt/1.pt')
-
 
 
 if __name__ == '__main__':
