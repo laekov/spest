@@ -6,10 +6,13 @@ import torch.nn.functional as F
 class Comparator(nn.Module):
     def __init__(self, input_size):
         super(Comparator, self).__init__()
-        self.fc = nn.Linear(input_size * 2, 3)
+        self.fc1 = nn.Linear(input_size * 2, 32)
+        self.fc2 = nn.Linear(32, 3)
 
     def forward(self, x, y):
-        x = F.softmax(x, dim=1)
-        y = F.softmax(y, dim=1)
-        o = self.fc(torch.cat((x, y), dim=1))
+        i = torch.cat((x, y), dim=1)
+        # i = F.softmax(i, dim=1)
+        o = self.fc1(i)
+        o = F.tanh(o)
+        o = self.fc2(o)
         return o
