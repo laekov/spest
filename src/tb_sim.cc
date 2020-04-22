@@ -20,12 +20,16 @@ cnt_t TBSim::calculate(int num_threads) {
 	 * Assume that all memory accesses are 4-byte
 	 */
 	auto gpu = HwSpec::getPlatform("vegavii");
+	cnt_t tot_access = 0;
+	cnt_t max_line = 0;
 	cnt_t tot_trans = 0;
 	for (auto& line : global_lds) {
 		size_t maxlen = 0;
 		for (auto& v : line.second) {
 			maxlen = std::max(maxlen, v.size());
+			tot_access += v.size();
 		}
+		max_line = std::max((cnt_t)maxlen, max_line);
 		for (size_t i = 0; i < maxlen; ++i) {
 			std::vector<unsigned long> addrs;
 			for (auto& v : line.second) {
@@ -48,15 +52,16 @@ cnt_t TBSim::calculate(int num_threads) {
 					for (j = i + 1; j < addrs.size() && addrs[j] == addrs[i]; ++j);
 					if (j > i + 1) {
 						i = j;
-						tot_trans += 1; // gpu->getGlobalMemLat(num_threads, (j - i));
+						tot_trans += gpu->getGlobalMemLat(num_threads, 4);
 						continue;
 					}
-					for (j = i + 1; j < addrs.size() && addrs[j] == addrs[j - 1] + 4 && j - i < 128; ++j);
-					tot_trans += 1; // gpu->getGlobalMemLat(num_threads, (j - i));
+					for (j = i + 1; j < addrs.size() && addrs[j] == addrs[j - 1] + 4 && j - i < 32; ++j);
+					tot_trans += gpu->getGlobalMemLat(num_threads, (j - i));
 					i = j;
 				}
 			}
 		}
 	}
+	// std::cout << tot_access << " " << max_line << " " << tot_trans << "\n";
 	return tot_trans;
 }

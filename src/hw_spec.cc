@@ -26,8 +26,8 @@ HwSpec* HwSpec::getPlatform(std::string platform) {
 	HwSpec* h = new HwSpec;
 	fin >> h->max_threads;
 	while (fin >> width >> threads >> gflops) {
-		h->global_mem_lat[encodeKey(width, threads)] = 1e9 / gflops;
-		tot += 1e9 / gflops;
+		h->global_mem_lat[encodeKey(width, threads)] = 1. / gflops;
+		tot += 1. / gflops;
 		++n;
 	}
 	h->mean_global_mem_lat = tot / std::max(n, 1);
