@@ -19,14 +19,14 @@ HwSpec* HwSpec::getPlatform(std::string platform) {
 		SPEST_LOG("Spec file " + spec_file + " does not exist");
 		assert(fin.is_open());
 	}
-	int width, threads;
+	int same, width, threads;
 	double gflops;
 	double tot = 0;
 	int n = 0;
 	HwSpec* h = new HwSpec;
 	fin >> h->max_threads;
-	while (fin >> width >> threads >> gflops) {
-		h->global_mem_lat[encodeKey(width, threads)] = 1. / gflops;
+	while (fin >> same >> width >> threads >> gflops) {
+		h->global_mem_lat[encodeKey(same, width, threads)] = 1. / gflops;
 		tot += 1. / gflops;
 		++n;
 	}
@@ -36,19 +36,22 @@ HwSpec* HwSpec::getPlatform(std::string platform) {
 	return h;
 }
 
-double HwSpec::getGlobalMemLat(int threads, int width) {
-	auto key = encodeKey(width, threads);
+double HwSpec::getGlobalMemBw(int threads, int width, int same) {
+	auto key = encodeKey(same, width, threads);
 	auto it = global_mem_lat.find(key);
 	if (it != global_mem_lat.end()) {
 		return it->second;
 	}
+	int sm = 1;
+	for (; sm < same; sm <<= 1);
 	int wr = 1;
 	for (; wr < width; wr <<= 1);
-	key = encodeKey(wr, threads);
+	key = encodeKey(sm, wr, threads);
 	it = global_mem_lat.find(key);
 	if (it != global_mem_lat.end()) {
 		return it->second;
 	}
-	// SPEST_LOG(width);
+	SPEST_LOG("Cannot find bandwidth for " << threads << " " << same << " " << width);
+	exit(0);
 	return mean_global_mem_lat;
 }
