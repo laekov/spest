@@ -37,7 +37,7 @@ cnt_t TBSim::calculate(int num_threads) {
 	cnt_t tot_access = 0;
 	cnt_t est_lat = 0;
 	for (auto& line : global_lds) {
-		// std::cerr << lookupHashRecord(line.first) << std::endl;
+		// std::cout << lookupHashRecord(line.first) << std::endl;
 
 		size_t maxlen = 0;
 		for (auto& v : line.second) {
@@ -71,12 +71,11 @@ cnt_t TBSim::calculate(int num_threads) {
 			int group_size = getMode(group_szs);
 
 			auto lat = gpu->getGlobalMemBw(num_threads, group_size, same_size);
-			est_lat += addrs.size() * lat;
-			// std::cout << addrs.size() << " " << lat << "\n";
+			est_lat += line.second.size() * lat; // addrs.size() * lat;
+			// std::cout << addrs.size() * lat << std::endl;
+			// std::cout << same_size << " " << group_size << " " << num_threads << " " << addrs.size() << " " << lat << "\n";
 		}
 	}
-	// exit(0);
 	// std::cout << tot_access << " " << est_lat << "\n";
-	// exit(0);
 	return est_lat;
 }
