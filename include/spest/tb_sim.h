@@ -12,6 +12,8 @@
 struct TBSim {
 	TDim sz;
 	std::unordered_map<hash_t, std::vector<std::vector<MemAccess> > > global_lds;
+
+	std::vector<std::vector<class ShflOp*> > shfls;
 	std::vector<std::vector<MemAccess> > shared_lds;
 
 	int current_thread;
@@ -19,6 +21,7 @@ struct TBSim {
 	TBSim(TDim dims): sz(dims), current_thread(0) {}
 
 	void ld(void*, size_t, hash_t);
+	void shfl(class ShflOp*);
 	void nextThread();
 	cnt_t calculate(int);
 };

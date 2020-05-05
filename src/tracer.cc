@@ -29,6 +29,10 @@ void Tracer::ld(void* addr, size_t sz, hash_t caller) {
 	current_tb->ld(addr, sz, caller);
 }
 
+void Tracer::shfl(ShflOp* op) {
+	current_tb->shfl(op);
+}
+
 cnt_t Tracer::get() const {
 	if (current_tb) {
 		cusim->addTB(current_tb);

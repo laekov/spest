@@ -29,6 +29,13 @@ void TBSim::nextThread() {
 	++current_thread;
 }
 
+void TBSim::shfl(ShflOp* op) {
+	if (shfls.size() == 0) {
+		shfls.resize(this->sz.n());
+	}
+	shfls[current_thread].push_back(op);
+}
+
 cnt_t TBSim::calculate(int num_threads) {
 	/* 
 	 * Assume that all memory accesses are 4-byte

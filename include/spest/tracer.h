@@ -29,6 +29,8 @@ struct Tracer {
 
 	void thread(TDim idx);
 
+	void shfl(class ShflOp*);
+
 	template<class T>
 	void ld(T* addr, hash_t caller) {
 		this->ld((void*)addr, sizeof(T), caller);
