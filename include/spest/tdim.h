@@ -18,4 +18,10 @@ struct TDim {
 		for (iter.y = 0; iter.y < lim.y; ++iter.y) \
 			for (iter.x = 0; iter.x < lim.x; ++iter.x) \
 
+#define SPEST_KERNEL_DEF_ARGS \
+	TDim blockDim, TDim blockIdx, TDim threadIdx, Tracer* _tracer_
+
+#define SPEST_KERNEL_ARGS \
+	blockDim, blockIdx, threadIdx, _default_tracer_ 
+
 #endif  // TDIM_H

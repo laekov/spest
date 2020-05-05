@@ -2,6 +2,7 @@
 #ifndef SIM_MEM_H
 #define SIM_MEM_H
 
+#include "shfl.h"
 #include "tracer.h"
 #include "hash.h"
 
@@ -24,6 +25,11 @@ public:
 			t->ld((T*)this + addr, caller);
 			return 0;
 		}
+	}
+
+	T operator ()(const ShflOut<int>& sout, const char* file=__builtin_FILE(), 
+			const int line=__builtin_LINE()) const {
+		return 0;
 	}
 };
 
