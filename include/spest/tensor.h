@@ -29,6 +29,8 @@ public:
 
 	T operator ()(const ShflOut<int>& sout, const char* file=__builtin_FILE(), 
 			const int line=__builtin_LINE()) const {
+		hash_t caller = hashCallerInfo(file, line);
+		t->ld(arr + sout.offset * sout.scale, sout.op, sout.scale, caller);
 		return 0;
 	}
 };

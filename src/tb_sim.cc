@@ -1,7 +1,9 @@
 #include <spest/tb_sim.h>
 #include <spest/debug.h>
 #include <spest/hw_spec.h>
+#include <spest/shfl.h>
 
+#include <cstring>
 #include <algorithm>
 
 int getMode(std::vector<int> a) {
@@ -25,6 +27,15 @@ void TBSim::ld(void* addr, size_t sz, hash_t caller) {
 	global_lds[caller][current_thread].push_back(MemAccess(sz, addr));
 }
 
+void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale) {
+	if (global_lds.find(caller) == global_lds.end()) {
+		global_lds[caller].resize(this->sz.n());
+	}
+	MemAccess m(sz, addr, shfl);
+	m.scale = scale;
+	global_lds[caller][current_thread].push_back(m);
+}
+
 void TBSim::nextThread() {
 	++current_thread;
 }
@@ -36,10 +47,60 @@ void TBSim::shfl(ShflOp* op) {
 	shfls[current_thread].push_back(op);
 }
 
+int TBSim::resolveShfls() {
+	int rest_shfl = 0, n = shfls.size();
+	std::vector<int> si;
+	si.resize(n);
+	while (rest_shfl) {
+		int first = -1, size = -1;
+		for (int i = 0; i < n; ++i) {
+			if (si[i] == shfls[i].size()) {
+				continue;
+			}
+			int gran = shfls[i][si[i]]->gran;
+			if (i / gran * gran != i) {
+				continue;
+			}
+			bool can_process = true;
+			for (int j = 0; j < gran; ++j) {
+				if (i + j >= n) {
+					return 1;
+				}
+				if (si[i + j] >= shfls[i + j].size()) {
+					return 2;
+				}
+				if (shfls[i + j][si[i + j]]->gran != gran) {
+					can_process = false;
+					break;
+				}
+			}
+			if (!can_process) {
+				continue;
+			}
+			first = i, size = gran;
+			break;
+		}
+		if (first == -1) {
+			return 3;
+		}
+		for (int i = first; i < first + size; ++i) {
+			int j = first + shfls[i][si[i]]->tgt_rank;
+			memcpy(shfls[i][si[i]]->res, shfls[j][si[j]]->val, shfls[i][si[i]]->sz);
+		}
+		for (int i = first; i < first + size; ++i) {
+			++si[i], --rest_shfl;
+		}
+	}
+	return 0;
+}
+
 cnt_t TBSim::calculate(int num_threads) {
 	/* 
 	 * Assume that all memory accesses are 4-byte
 	 */
+	if (auto res = resolveShfls()) {
+		SPEST_LOG("Failed to resolve shufls with error code " << res);
+	}
 	auto gpu = HwSpec::getPlatform("vegavii");
 	cnt_t tot_access = 0;
 	cnt_t est_lat = 0;
@@ -57,7 +118,7 @@ cnt_t TBSim::calculate(int num_threads) {
 			std::vector<unsigned long> addrs;
 			for (auto& v : line.second) {
 				if (v.size() > i) {
-					addrs.push_back(v[i].addr);
+					addrs.push_back(v[i].getAddr());
 				}
 			}
 			std::sort(addrs.begin(), addrs.end());

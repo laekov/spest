@@ -21,8 +21,11 @@ struct TBSim {
 	TBSim(TDim dims): sz(dims), current_thread(0) {}
 
 	void ld(void*, size_t, hash_t);
+	void ld(void*, size_t, hash_t, class ShflOp*, size_t);
 	void shfl(class ShflOp*);
 	void nextThread();
+
+	int resolveShfls();
 	cnt_t calculate(int);
 };
 

@@ -18,6 +18,7 @@ struct Tracer {
 	CUSim *cusim;
 
 	void ld(void* addr, size_t sz, hash_t caller);
+	void ld(void* addr, size_t sz, hash_t caller, class ShflOp* shfl, size_t scale);
 
 	Tracer(): current_tb(0), cusim(new CUSim) {}
 
@@ -34,6 +35,11 @@ struct Tracer {
 	template<class T>
 	void ld(T* addr, hash_t caller) {
 		this->ld((void*)addr, sizeof(T), caller);
+	}
+
+	template<class T>
+	void ld(T* addr, class ShflOp* shfl, size_t scale, hash_t caller) {
+		this->ld((void*)addr, sizeof(T), caller, shfl, scale);
 	}
 
 	cnt_t get() const;
