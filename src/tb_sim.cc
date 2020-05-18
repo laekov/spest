@@ -20,31 +20,35 @@ int getMode(std::vector<int> a) {
 	return modv;
 }
 
-void TBSim::ld(void* addr, size_t sz, hash_t caller) {
+void TBSim::checkCaller(hash_t caller) {
+#pragma omp critical 
 	if (global_lds.find(caller) == global_lds.end()) {
 		global_lds[caller].resize(this->sz.n());
 	}
-	global_lds[caller][current_thread].push_back(MemAccess(sz, addr));
 }
 
-void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale) {
+void TBSim::ld(void* addr, size_t sz, hash_t caller, TDim thid) {
 	if (global_lds.find(caller) == global_lds.end()) {
-		global_lds[caller].resize(this->sz.n());
+		checkCaller(caller);
+	}
+	global_lds[caller][getTh(thid)].push_back(MemAccess(sz, addr));
+}
+
+void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale, TDim thid) {
+	if (global_lds.find(caller) == global_lds.end()) {
+		checkCaller(caller);
 	}
 	MemAccess m(sz, addr, shfl);
 	m.scale = scale;
-	global_lds[caller][current_thread].push_back(m);
+	global_lds[caller][getTh(thid)].push_back(m);
 }
 
-void TBSim::nextThread() {
-	++current_thread;
+void TBSim::shfl(ShflOp* op, TDim thid) {
+	shfls[getTh(thid)].push_back(op);
 }
 
-void TBSim::shfl(ShflOp* op) {
-	if (shfls.size() == 0) {
-		shfls.resize(this->sz.n());
-	}
-	shfls[current_thread].push_back(op);
+int TBSim::getTh(TDim idx) {
+	return idx.toid(sz);
 }
 
 int TBSim::resolveShfls() {

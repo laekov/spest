@@ -1,46 +1,46 @@
+#include <omp.h>
+
 #include <spest/tracer.h>
 
 
-void Tracer::dims(TDim blocks, TDim threads) {
+void Tracer::sim(TDim blocks, TDim threads) {
 	sz = blocks;
 	shp = threads;
+	cusim = new CUSim(blocks, threads);
 }
 
 void Tracer::limitTBperCU(int n) {
 	cusim->max_tb = std::min(cusim->max_tb, n);
 }
 
-void Tracer::block(TDim idx) {
-	if (current_tb) {
-		cusim->addTB(current_tb);
-	}
-	current_tb = 0;
-}
-
-void Tracer::thread(TDim idx) {
-	if (current_tb) {
-		current_tb->nextThread();
-	} else {
-		current_tb = new TBSim(shp);
-	}
+void Tracer::registerThread(int omp_thread_idx, TDim blockIdx, TDim threadIdx) {
+#pragma omp critical
+	block_idxs[omp_thread_idx] = blockIdx;
+#pragma omp critical
+	thread_idxs[omp_thread_idx] = threadIdx;
 }
 
 void Tracer::ld(void* addr, size_t sz, hash_t caller) {
-	current_tb->ld(addr, sz, caller);
+	getTBSim()->ld(addr, sz, caller, getTh());
 }
 
 void Tracer::ld(void* addr, size_t sz, hash_t caller, class ShflOp* shfl, size_t scale) {
-	current_tb->ld(addr, sz, caller, shfl, scale);
+	getTBSim()->ld(addr, sz, caller, shfl, scale, getTh());
 }
 
 void Tracer::shfl(ShflOp* op) {
-	current_tb->shfl(op);
+	getTBSim()->shfl(op, getTh());
+}
+
+TBSim* Tracer::getTBSim() {
+	return cusim->tbs[block_idxs[omp_get_thread_num()].toid(shp)];
+}
+
+TDim Tracer::getTh() {
+	return thread_idxs[omp_get_thread_num()];
 }
 
 cnt_t Tracer::get() const {
-	if (current_tb) {
-		cusim->addTB(current_tb);
-	}
 	return cusim->calculate();
 }
 

@@ -5,10 +5,6 @@
 #include <vector>
 #include <functional>
 
-void CUSim::addTB(TBSim* tb) {
-	tbs.push_back(tb);
-}
-
 cnt_t CUSim::calculate() {
 	cnt_t tot_trans = 0;
 	auto gpu = HwSpec::getPlatform("vegavii");
@@ -20,8 +16,14 @@ cnt_t CUSim::calculate() {
 	for (int i = 0; i < 60; ++i) {
 		cu_time.push(0);
 	}
-	for (auto tb : tbs) {
-		auto t = tb->calculate(num_th);
+	std::vector<cnt_t> tb_res;
+	tb_res.resize(tbs.size());
+#pragma omp parallel for
+	for (size_t i = 0; i < tbs.size(); ++i) {
+		tb_res[i] = tbs[i]->calculate(num_th);
+	}
+	for (size_t i = 0; i < tbs.size(); ++i) {
+		auto t = tb_res[i]; // tb->calculate(num_th);
 		tot_trans += t;
 		t += cu_time.top();
 		cu_time.pop();

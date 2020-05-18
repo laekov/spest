@@ -9,10 +9,15 @@
 struct CUSim {
 	int max_th, max_tb;
 	std::vector<TBSim*> tbs;
-	void addTB(TBSim*);
+
 	cnt_t calculate();
 
-	CUSim(): max_th(0x7ffff), max_tb(0x7ffff) {}
+	CUSim(TDim sz_, TDim shp_): max_th(0x7ffff), max_tb(0x7ffff) {
+		tbs.resize(sz_.n());
+		for (auto& tb : tbs) {
+			tb = new TBSim(shp_);
+		}
+	}
 };
 
 #endif

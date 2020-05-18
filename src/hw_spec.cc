@@ -43,15 +43,15 @@ double HwSpec::getGlobalMemBw(int threads, int width, int same) {
 		return it->second;
 	}
 	int sm = 1;
-	for (; sm < same; sm <<= 1);
-	int wr = 1;
+	for (; (sm << 1) <= same; sm <<= 1);
+	int wr = 4;
 	for (; wr < width; wr <<= 1);
 	key = encodeKey(sm, wr, threads);
 	it = global_mem_lat.find(key);
 	if (it != global_mem_lat.end()) {
 		return it->second;
 	}
-	SPEST_LOG("Cannot find bandwidth for " << threads << " " << same << " " << width);
+	SPEST_LOG("Cannot find bandwidth for " << threads << " " << same << " " << width) << " using " << sm << " " << wr << "\n";
 	exit(0);
 	return mean_global_mem_lat;
 }

@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <string>
+#include <map>
 #include <assert.h>
 
 #include "tdim.h"
@@ -14,21 +15,24 @@
 
 struct Tracer {
 	TDim sz, shp;
-	TBSim *current_tb;
+
 	CUSim *cusim;
+
+	std::map<int, TDim> block_idxs, thread_idxs;
+
+	TBSim* getTBSim();
+	TDim getTh();
 
 	void ld(void* addr, size_t sz, hash_t caller);
 	void ld(void* addr, size_t sz, hash_t caller, class ShflOp* shfl, size_t scale);
 
-	Tracer(): current_tb(0), cusim(new CUSim) {}
+	Tracer() {}
 
-	void dims(TDim blocks, TDim threads);
+	void sim(TDim blocks, TDim threads);
 
 	void limitTBperCU(int n);
 
-	void block(TDim idx);
-
-	void thread(TDim idx);
+	void registerThread(int, TDim, TDim);
 
 	void shfl(class ShflOp*);
 

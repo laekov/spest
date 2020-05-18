@@ -18,12 +18,16 @@ struct TBSim {
 
 	int current_thread;
 
-	TBSim(TDim dims): sz(dims), current_thread(0) {}
+	TBSim(TDim dims): sz(dims), shfls(dims.n()) {}
 
-	void ld(void*, size_t, hash_t);
-	void ld(void*, size_t, hash_t, class ShflOp*, size_t);
-	void shfl(class ShflOp*);
+	void checkCaller(hash_t);
+
+	void ld(void*, size_t, hash_t, TDim);
+	void ld(void*, size_t, hash_t, class ShflOp*, size_t, TDim);
+	void shfl(class ShflOp*, TDim);
 	void nextThread();
+
+	int getTh(TDim idx);
 
 	int resolveShfls();
 	cnt_t calculate(int);
