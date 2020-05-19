@@ -1,5 +1,6 @@
 #include <spest/cu_sim.h>
 #include <spest/hw_spec.h>
+#include <spest/debug.h>
 
 #include <queue>
 #include <vector>
@@ -18,8 +19,9 @@ cnt_t CUSim::calculate() {
 	}
 	std::vector<cnt_t> tb_res;
 	tb_res.resize(tbs.size());
-#pragma omp parallel for
-	for (size_t i = 0; i < tbs.size(); ++i) {
+	size_t n_tbs = tbs.size();
+#pragma omp parallel for schedule(dynamic, 4)
+	for (size_t i = 0; i < n_tbs; ++i) {
 		tb_res[i] = tbs[i]->calculate(num_th);
 	}
 	for (size_t i = 0; i < tbs.size(); ++i) {

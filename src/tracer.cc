@@ -1,6 +1,7 @@
 #include <omp.h>
 
 #include <spest/tracer.h>
+#include <spest/debug.h>
 
 
 void Tracer::sim(TDim blocks, TDim threads) {

@@ -20,6 +20,7 @@ hash_t hashCallerInfo(const char* file, int line) {
 	for (const char* i = file; *i; ++i) {
 		res = res * 37 + *i;
 	}
+#pragma omp critical
 	_hash_record[res ^ line] = std::pair<std::string, int>(std::string(file), line);
 	return res ^ line;
 }
