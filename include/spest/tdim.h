@@ -23,6 +23,9 @@ struct TDim {
 		for (int iter##y = 0; iter##y < lim.y; ++iter##y) \
 			for (int iter##x = 0; iter##x < lim.x; ++iter##x) \
 
+#define EXPAND_ENUM(iter) \
+	TDim iter(iter##x, iter##y, iter##z)
+
 #define SPEST_KERNEL_DEF_ARGS \
 	TDim blockDim, TDim blockIdx, TDim threadIdx, Tracer* _tracer_
 
@@ -31,8 +34,8 @@ struct TDim {
 
 #define SPEST_LAUNCH_KERNEL(__kernel__, n_blocks, n_threads) \
 	ENUM_TDIM(blockIdx, n_blocks) ENUM_TDIM(threadIdx, n_threads) { \
-		TDim blockIdx(blockIdxx, blockIdxy, blockIdxz); \
-		TDim threadIdx(threadIdxx, threadIdxy, threadIdxz); \
+		EXPAND_ENUM(blockIdx); \
+		EXPAND_ENUM(threadIdx); \
 		_default_tracer_->registerThread(omp_get_thread_num(), blockIdx, threadIdx); \
 		__kernel__; \
 	}

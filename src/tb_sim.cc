@@ -40,10 +40,12 @@ void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale,
 	}
 	MemAccess m(sz, addr, shfl);
 	m.scale = scale;
+#pragma omp critical
 	global_lds[caller][getTh(thid)].push_back(m);
 }
 
 void TBSim::shfl(ShflOp* op, TDim thid) {
+#pragma omp critical
 	shfls[getTh(thid)].push_back(op);
 }
 

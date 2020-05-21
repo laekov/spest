@@ -31,7 +31,9 @@ public:
 
 template<class T>
 ShflOut<T> fakeShuffle(Tracer* t, T val, int tgt, int gran, TDim idx) {
-	ShflOp* op = new ShflOp(tgt, gran, sizeof(T));
+	ShflOp* op;
+#pragma omp critical
+	op = new ShflOp(tgt, gran, sizeof(T));
 	memcpy(op->val, &val, sizeof(T));
 
 	t->shfl(op);

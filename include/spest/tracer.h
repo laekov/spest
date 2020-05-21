@@ -12,16 +12,14 @@
 #include "cu_sim.h"
 #include "hash.h"
 
-
 struct Tracer {
 	TDim sz, shp;
 
 	CUSim *cusim;
 
-	std::map<int, TDim> block_idxs, thread_idxs;
+	std::vector<TDim> block_idxs, thread_idxs;
 
-	TBSim* getTBSim();
-	TDim getTh();
+	unsigned long getIdxByThread();
 
 	void ld(void* addr, size_t sz, hash_t caller);
 	void ld(void* addr, size_t sz, hash_t caller, class ShflOp* shfl, size_t scale);
