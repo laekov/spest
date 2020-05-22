@@ -20,7 +20,11 @@ hash_t hashCallerInfo(const char* file, int line) {
 	for (const char* i = file; *i; ++i) {
 		res = res * 37 + *i;
 	}
+#ifdef SPEST_DEBUG
+	if (_hash_record.find(res ^ line) == _hash_record.end()) {
 #pragma omp critical
-	_hash_record[res ^ line] = std::pair<std::string, int>(std::string(file), line);
+		_hash_record[res ^ line] = std::pair<std::string, int>(std::string(file), line);
+	}
+#endif
 	return res ^ line;
 }

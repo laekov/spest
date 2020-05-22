@@ -27,7 +27,7 @@ struct ShflRecord {
 };
 
 std::vector<std::vector<LdRecord> > local_lds;
-std::vector<std::vector<ShflRecord>  > local_shfls;
+std::vector<std::vector<ShflRecord> > local_shfls;
 
 
 void Tracer::registerThread(int omp_thread_idx, TDim blockIdx, TDim threadIdx) {
@@ -41,8 +41,30 @@ void Tracer::registerThread(int omp_thread_idx, TDim blockIdx, TDim threadIdx) {
 			local_shfls.resize(sz.n() * shp.n());
 		}
 	}
+	
+#ifdef SPEST_PREALLOC
+	static size_t sum_sz_lds(0), sum_sz_shfls(0), cnt_th(0);
+	auto idx = getIdxByThread();
+	if (idx > 0) {
+#pragma omp critical 
+		{
+			sum_sz_lds += local_lds[idx].size();
+			sum_sz_shfls += local_shfls[idx].size();
+			++cnt_th;
+		}
+	}
+#endif
+
 	block_idxs[omp_thread_idx] = blockIdx;
 	thread_idxs[omp_thread_idx] = threadIdx;
+
+#ifdef SPEST_PREALLOC
+	idx = getIdxByThread();
+	if (cnt_th > 0) {
+		local_lds[idx].reserve(std::max(16ul, sum_sz_lds / cnt_th));
+		local_shfls[idx].reserve(std::max(16ul, sum_sz_shfls / cnt_th));
+	}
+#endif
 }
 
 unsigned long Tracer::getIdxByThread() {
