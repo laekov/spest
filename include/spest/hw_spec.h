@@ -14,10 +14,12 @@ struct HwSpec {
 	static std::unordered_map<std::string, HwSpec*> platforms;
 	static HwSpec* getPlatform(std::string);
 
-
 	int max_threads;
+	int max_tb_per_cu;
+	int num_cu;
+
 	prof_res_t global_mem_lat;
-	double mean_global_mem_lat;
+	prof_res_t mean_global_mem_lat;
 
 	double getGlobalMemBw(int threads, int width, int same);
 };

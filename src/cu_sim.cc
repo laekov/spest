@@ -8,13 +8,15 @@
 
 cnt_t CUSim::calculate() {
 	cnt_t tot_trans = 0;
-	auto gpu = HwSpec::getPlatform("vegavii");
+	auto gpu = HwSpec::getPlatform("system");
 	unsigned long num_th = gpu->max_threads;
+	max_tb = std::min(max_tb, gpu->max_tb_per_cu);
 	if (max_tb < 0x7ffff) {
 		num_th = std::min(num_th, tbs[0]->sz.n() * max_tb);
 	}
 	std::priority_queue<cnt_t, std::vector<cnt_t>, std::greater<cnt_t> > cu_time;
-	for (int i = 0; i < 60; ++i) {
+
+	for (int i = 0; i < gpu->num_cu; ++i) {
 		cu_time.push(0);
 	}
 	std::vector<cnt_t> tb_res;
