@@ -18,13 +18,14 @@ struct Tracer {
 	CUSim *cusim;
 
 	std::vector<TDim> block_idxs, thread_idxs;
+	bool initialized;
 
 	unsigned long getIdxByThread();
 
 	void ld(void* addr, size_t sz, hash_t caller);
 	void ld(void* addr, size_t sz, hash_t caller, class ShflOp* shfl, size_t scale);
 
-	Tracer() {}
+	Tracer(): initialized(false) {}
 
 	void sim(TDim blocks, TDim threads);
 

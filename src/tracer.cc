@@ -31,14 +31,15 @@ std::vector<std::vector<ShflRecord> > local_shfls;
 
 
 void Tracer::registerThread(int omp_thread_idx, TDim blockIdx, TDim threadIdx) {
-	if (block_idxs.size() == 0) {
+	if (!initialized) {
 #pragma omp critical
-		if (block_idxs.size() == 0) {
+		if (!initialized) {
 			auto nth = omp_get_num_threads();
 			block_idxs.resize(nth);
 			thread_idxs.resize(nth);
 			local_lds.resize(sz.n() * shp.n());
 			local_shfls.resize(sz.n() * shp.n());
+			initialized = true;
 		}
 	}
 	
@@ -91,7 +92,8 @@ void Tracer::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale
 }
 
 void Tracer::shfl(ShflOp* op) {
-	local_shfls[omp_get_thread_num()].push_back({
+	auto idx = getIdxByThread();
+	local_shfls[idx].push_back({
 			.shfl = op
 	});
     // getTBSim()->shfl(op, getTh());
