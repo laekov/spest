@@ -7,6 +7,9 @@
 #include <functional>
 
 cnt_t CUSim::calculate() {
+	if (tbs.size() == 0) {
+		return 0;
+	}
 	cnt_t tot_trans = 0;
 	auto gpu = HwSpec::getPlatform("system");
 	unsigned long num_th = gpu->max_threads;
