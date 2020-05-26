@@ -1,6 +1,7 @@
 #include <spest/cu_sim.h>
 #include <spest/hw_spec.h>
 #include <spest/debug.h>
+#include <spest/shfl.h>
 
 #include <queue>
 #include <vector>
@@ -28,7 +29,9 @@ cnt_t CUSim::calculate() {
 #pragma omp parallel for schedule(dynamic, 4)
 	for (size_t i = 0; i < n_tbs; ++i) {
 		tb_res[i] = tbs[i]->calculate(num_th);
+		delete tbs[i];
 	}
+	clearShfl();
 	for (size_t i = 0; i < tbs.size(); ++i) {
 		auto t = tb_res[i]; // tb->calculate(num_th);
 		tot_trans += t;

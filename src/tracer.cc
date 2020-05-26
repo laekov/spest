@@ -114,12 +114,13 @@ cnt_t Tracer::get() const {
 					tb_sim->ld(r.addr, r.sz, r.caller, threadIdx);
 				}
 			}
+			local_lds[th_idx].clear();
 			for (auto r : local_shfls[th_idx]) {
 				tb_sim->shfl(r.shfl, threadIdx);
 			}
+			local_shfls[th_idx].clear();
 		}
 	}
-
 	return cusim->calculate();
 }
 

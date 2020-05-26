@@ -11,6 +11,7 @@ public:
 	int tgt_rank, gran;
 	size_t sz;
 
+	ShflOp() {}
 	ShflOp(int t_, int g_, size_t sz_):
 		tgt_rank(t_), gran(g_), sz(sz_) {}
 };
@@ -29,10 +30,13 @@ public:
 	}
 };
 
+ShflOp* allocShfl(int, int, size_t);
+void clearShfl();
+
 template<class T>
 ShflOut<T> fakeShuffle(Tracer* t, T val, int tgt, int gran, TDim idx) {
 	ShflOp* op;
-	op = new ShflOp(tgt, gran, sizeof(T));
+	op = allocShfl(tgt, gran, sizeof(T));
 	memcpy(op->val, &val, sizeof(T));
 
 	t->shfl(op);
