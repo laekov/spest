@@ -1,4 +1,5 @@
 #include <spest/hash.h>
+#include <spest/debug.h>
 
 #include <sstream>
 #include <unordered_map>

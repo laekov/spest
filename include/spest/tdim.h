@@ -2,8 +2,6 @@
 #ifndef TDIM_H
 #define TDIM_H
 
-#include <omp.h>
-
 typedef double cnt_t;
 
 struct TDim {
@@ -36,7 +34,7 @@ struct TDim {
 	ENUM_TDIM(blockIdx, n_blocks) ENUM_TDIM(threadIdx, n_threads) { \
 		EXPAND_ENUM(blockIdx); \
 		EXPAND_ENUM(threadIdx); \
-		_default_tracer_->registerThread(omp_get_thread_num(), blockIdx, threadIdx); \
+		_default_tracer_->registerThread(blockIdx, threadIdx); \
 		__kernel__; \
 	}
 

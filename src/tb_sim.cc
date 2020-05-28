@@ -52,6 +52,9 @@ int TBSim::getTh(TDim idx) {
 
 int TBSim::resolveShfls() {
 	int rest_shfl = 0, n = shfls.size();
+	for (auto& s : shfls) {
+		rest_shfl += s.size();
+	}
 	std::vector<int> si;
 	si.resize(n);
 	while (rest_shfl) {
@@ -104,7 +107,7 @@ cnt_t TBSim::calculate(int num_threads) {
 	if (auto res = resolveShfls()) {
 		SPEST_LOG("Failed to resolve shufls with error code " << res);
 	}
-	auto gpu = HwSpec::getPlatform("vegavii");
+	auto gpu = HwSpec::getPlatform("system");
 	cnt_t tot_access = 0;
 	cnt_t est_lat = 0;
 	for (auto& line : global_lds) {
@@ -142,9 +145,10 @@ cnt_t TBSim::calculate(int num_threads) {
 			int group_size = getMode(group_szs);
 
 			auto lat = gpu->getGlobalMemBw(num_threads, group_size, same_size);
-			est_lat += line.second.size() * lat; // addrs.size() * lat;
+			// est_lat += line.second.size() * lat; // addrs.size() * lat;
+			est_lat += addrs.size() * lat; // addrs.size() * lat;
 			// std::cout << addrs.size() * lat << std::endl;
-			// std::cout << same_size << " " << group_size << " " << num_threads << " " << addrs.size() << " " << lat << "\n";
+			// std::cout << same_size << " " << group_size << " " << num_threads << " " << lat << "\n";
 		}
 	}
 	// std::cout << tot_access << " " << est_lat << "\n";

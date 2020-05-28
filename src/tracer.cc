@@ -1,6 +1,8 @@
 #include <omp.h>
+#include <cstring>
 
 #include <spest/tracer.h>
+#include <spest/shfl.h>
 #include <spest/debug.h>
 
 
@@ -30,8 +32,9 @@ std::vector<std::vector<LdRecord> > local_lds;
 std::vector<std::vector<ShflRecord> > local_shfls;
 
 
-void Tracer::registerThread(int omp_thread_idx, TDim blockIdx, TDim threadIdx) {
-	if (!initialized) {
+void Tracer::registerThread(TDim blockIdx, TDim threadIdx) {
+	int omp_thread_idx = omp_get_thread_num();
+		if (!initialized) {
 #pragma omp critical
 		if (!initialized) {
 			auto nth = omp_get_num_threads();
@@ -101,7 +104,22 @@ void Tracer::shfl(ShflOp* op) {
 
 cnt_t Tracer::get() const {
 	size_t n_tbs = cusim->tbs.size();
-#pragma omp parallel for schedule(dynamic, 4)
+
+	/*
+	int lines = 0;
+	for (auto s : local_shfls) {
+		std::cerr << s.size() << std::endl;
+		for (auto i : s) {
+			int v;
+			memcpy(&v, i.shfl->val, sizeof(int));
+			std::cerr << i.shfl->tgt_rank << " " << i.shfl->gran << " " << v << "\n";
+		}
+		if ((lines += s.size()) > 1000) {
+			break;
+		}
+	}
+	*/
+#pragma omp parallel for schedule(dynamic, 64)
 	for (size_t i = 0; i < n_tbs; ++i) {
 		auto tb_sim = cusim->tbs[i];
 		ENUM_TDIM(threadIdx, shp) {

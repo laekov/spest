@@ -26,6 +26,8 @@ cnt_t CUSim::calculate() {
 	std::vector<cnt_t> tb_res;
 	tb_res.resize(tbs.size());
 	size_t n_tbs = tbs.size();
+	// tbs[2]->calculate(num_th);
+	// return 0;
 #pragma omp parallel for schedule(dynamic, 4)
 	for (size_t i = 0; i < n_tbs; ++i) {
 		tb_res[i] = tbs[i]->calculate(num_th);

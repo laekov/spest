@@ -31,7 +31,7 @@ struct Tracer {
 
 	void limitTBperCU(int n);
 
-	void registerThread(int, TDim, TDim);
+	void registerThread(TDim, TDim);
 
 	void shfl(class ShflOp*);
 
