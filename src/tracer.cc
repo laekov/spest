@@ -10,6 +10,7 @@ void Tracer::sim(TDim blocks, TDim threads) {
 	sz = blocks;
 	shp = threads;
 	cusim = new CUSim(blocks, threads);
+	this->initialized = false;
 }
 
 void Tracer::limitTBperCU(int n) {

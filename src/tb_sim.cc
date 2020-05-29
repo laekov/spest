@@ -90,13 +90,14 @@ int TBSim::resolveShfls() {
 			return 3;
 		}
 		for (int i = first; i < first + size; ++i) {
-			int j = first + shfls[i][si[i]]->tgt_rank;
+			int j = first + shfls[i][si[i]]->tgt_rank % size;
 			memcpy(shfls[i][si[i]]->res, shfls[j][si[j]]->val, shfls[i][si[i]]->sz);
 		}
 		for (int i = first; i < first + size; ++i) {
 			++si[i], --rest_shfl;
 		}
 	}
+	shfls.resize(0);
 	return 0;
 }
 
@@ -152,5 +153,6 @@ cnt_t TBSim::calculate(int num_threads) {
 		}
 	}
 	// std::cout << tot_access << " " << est_lat << "\n";
+	// exit(0);
 	return est_lat;
 }
