@@ -25,13 +25,15 @@ struct TDim {
 	TDim iter(iter##x, iter##y, iter##z)
 
 #define SPEST_KERNEL_DEF_ARGS \
-	TDim blockDim, TDim blockIdx, TDim threadIdx, Tracer* _tracer_
+	TDim gridDim, TDim blockDim, TDim blockIdx, TDim threadIdx, Tracer* _tracer_
 
 #define SPEST_KERNEL_ARGS \
-	blockDim, blockIdx, threadIdx, _default_tracer_ 
+	_gridDim_, _blockDim_, blockIdx, threadIdx, _default_tracer_ 
 
 #define SPEST_LAUNCH_KERNEL(__kernel__, n_blocks, n_threads) \
 	ENUM_TDIM(blockIdx, n_blocks) ENUM_TDIM(threadIdx, n_threads) { \
+		TDim _gridDim_ = n_blocks; \
+		TDim _blockDim_ = n_threads; \
 		EXPAND_ENUM(blockIdx); \
 		EXPAND_ENUM(threadIdx); \
 		_default_tracer_->registerThread(blockIdx, threadIdx); \

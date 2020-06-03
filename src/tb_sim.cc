@@ -128,7 +128,7 @@ cnt_t TBSim::calculate(int num_threads) {
 					addrs.push_back(v[i].getAddr());
 				}
 			}
-			std::sort(addrs.begin(), addrs.end());
+			// std::sort(addrs.begin(), addrs.end());
 
 			std::vector<int> same_sizes;
 			for (size_t i = 0, j; i < addrs.size(); i = j) {
