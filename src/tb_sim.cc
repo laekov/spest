@@ -140,7 +140,7 @@ cnt_t TBSim::calculate(int num_threads) {
 			size_t last_addr = std::unique(addrs.begin(), addrs.end()) - addrs.begin();
 			std::vector<int> group_szs;
 			for (size_t i = 0, j; i < last_addr; i = j) {
-				for (j = i + 1; j < addrs.size() && addrs[j] == addrs[j - 1] + 4; ++j);
+				for (j = i + 1; j < last_addr && addrs[j] == addrs[j - 1] + 4; ++j);
 				group_szs.push_back((j - i) * sizeof(int));
 			}
 			int group_size = getMode(group_szs);
