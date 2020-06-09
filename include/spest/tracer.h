@@ -45,7 +45,12 @@ struct Tracer {
 		this->ld((void*)addr, sizeof(T), caller, shfl, scale);
 	}
 
-	cnt_t get() const;
+	int getId(TDim);
+
+	void insertTB(int);
+	void calculateTB(int);
+
+	cnt_t get();
 };
 
 

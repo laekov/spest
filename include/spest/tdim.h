@@ -40,5 +40,20 @@ struct TDim {
 		__kernel__; \
 	}
 
+#define SPEST_LAUNCH_KERNEL_COMPACT(__kernel__, n_blocks, n_threads) \
+	ENUM_TDIM(blockIdx, n_blocks) { \
+		EXPAND_ENUM(blockIdx); \
+		ENUM_TDIM(threadIdx, n_threads) { \
+			TDim _gridDim_ = n_blocks; \
+			TDim _blockDim_ = n_threads; \
+			EXPAND_ENUM(threadIdx); \
+			_default_tracer_->registerThread(blockIdx, threadIdx); \
+			__kernel__; \
+		} \
+		int idx = _default_tracer_->getId(blockIdx); \
+		_default_tracer_->insertTB(idx); \
+		_default_tracer_->calculateTB(idx); \
+	}
+
 
 #endif  // TDIM_H

@@ -44,6 +44,10 @@ void Tracer::registerThread(TDim blockIdx, TDim threadIdx) {
 			local_lds.resize(sz.n() * shp.n());
 			local_shfls.resize(sz.n() * shp.n());
 			initialized = true;
+			// for (int i = 0; i < sz.n() * shp.n(); ++i) {
+				// local_lds[i].reserve(128);
+				// local_shfls[i].reserve(1024);
+			// }
 		}
 	}
 	
@@ -103,7 +107,7 @@ void Tracer::shfl(ShflOp* op) {
     // getTBSim()->shfl(op, getTh());
 }
 
-cnt_t Tracer::get() const {
+cnt_t Tracer::get() {
 	size_t n_tbs = cusim->tbs.size();
 
 	/*
@@ -119,27 +123,49 @@ cnt_t Tracer::get() const {
 			break;
 		}
 	}
+	for (int i = 0; i < 257; ++i) {
+		for (int j = 0; j < 30; ++j) {
+			std::cerr << *(int*)local_lds[i][j].addr << " " << lookupHashRecord(local_lds[i][j].caller) << "\n";
+		}
+	}
 	*/
 #pragma omp parallel for schedule(dynamic, 64)
 	for (size_t i = 0; i < n_tbs; ++i) {
-		auto tb_sim = cusim->tbs[i];
-		ENUM_TDIM(threadIdx, shp) {
-			EXPAND_ENUM(threadIdx);
-			auto th_idx = i * shp.n() + threadIdx.toid(shp);
-			for (auto r : local_lds[th_idx]) {
-				if (r.shfl) {
-					tb_sim->ld(r.addr, r.sz, r.caller, r.shfl, r.scale, threadIdx);
-				} else {
-					tb_sim->ld(r.addr, r.sz, r.caller, threadIdx);
-				}
-			}
-			local_lds[th_idx].clear();
-			for (auto r : local_shfls[th_idx]) {
-				tb_sim->shfl(r.shfl, threadIdx);
-			}
-			local_shfls[th_idx].clear();
+		if (cusim->tbs[i]) {
+			insertTB(i);
 		}
 	}
 	return cusim->calculate();
+}
+
+int Tracer::getId(TDim blockIdx) {
+	return blockIdx.toid(sz);
+}
+
+void Tracer::insertTB(int idx) {
+	auto tb_sim = cusim->tbs[idx];
+	ENUM_TDIM(threadIdx, shp) {
+		EXPAND_ENUM(threadIdx);
+		auto th_idx = idx * shp.n() + threadIdx.toid(shp);
+		auto thid = tb_sim->getTh(threadIdx);
+		for (auto r : local_lds[th_idx]) {
+			if (r.shfl) {
+				tb_sim->ld(r.addr, r.sz, r.caller, r.shfl, r.scale, thid);
+			} else {
+				tb_sim->ld(r.addr, r.sz, r.caller, thid);
+			}
+		}
+		local_lds[th_idx].clear();
+		for (auto r : local_shfls[th_idx]) {
+			tb_sim->shfl(r.shfl, thid);
+		}
+		local_shfls[th_idx].clear();
+	}
+}
+
+void Tracer::calculateTB(int idx) {
+	cusim->tb_res[idx] = cusim->tbs[idx]->calculate(cusim->getNumTh());
+	delete cusim->tbs[idx];
+	cusim->tbs[idx] = 0;
 }
 

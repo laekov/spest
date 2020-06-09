@@ -22,9 +22,9 @@ struct TBSim {
 
 	void checkCaller(hash_t);
 
-	void ld(void*, size_t, hash_t, TDim);
-	void ld(void*, size_t, hash_t, class ShflOp*, size_t, TDim);
-	void shfl(class ShflOp*, TDim);
+	void ld(void*, size_t, hash_t, int);
+	void ld(void*, size_t, hash_t, class ShflOp*, size_t, int);
+	void shfl(class ShflOp*, int);
 	void nextThread();
 
 	int getTh(TDim idx);

@@ -26,24 +26,24 @@ void TBSim::checkCaller(hash_t caller) {
 	}
 }
 
-void TBSim::ld(void* addr, size_t sz, hash_t caller, TDim thid) {
+void TBSim::ld(void* addr, size_t sz, hash_t caller, int thid) {
 	if (global_lds.find(caller) == global_lds.end()) {
 		checkCaller(caller);
 	}
-	global_lds[caller][getTh(thid)].push_back(MemAccess(sz, addr));
+	global_lds[caller][thid].push_back(MemAccess(sz, addr));
 }
 
-void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale, TDim thid) {
+void TBSim::ld(void* addr, size_t sz, hash_t caller, ShflOp* shfl, size_t scale, int thid) {
 	if (global_lds.find(caller) == global_lds.end()) {
 		checkCaller(caller);
 	}
 	MemAccess m(sz, addr, shfl);
 	m.scale = scale;
-	global_lds[caller][getTh(thid)].push_back(m);
+	global_lds[caller][thid].push_back(m);
 }
 
-void TBSim::shfl(ShflOp* op, TDim thid) {
-	shfls[getTh(thid)].push_back(op);
+void TBSim::shfl(ShflOp* op, int thid) {
+	shfls[thid].push_back(op);
 }
 
 int TBSim::getTh(TDim idx) {
